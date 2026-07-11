@@ -427,7 +427,6 @@ class SkyberryHollow extends Phaser.Scene {
     const startAdventure=event=>{
       this.audio.start();
       this.playerName=(event.detail?.name||'Lumi').slice(0,14);
-      if(this.playerNameTag)this.playerNameTag.setText(this.playerName.toUpperCase());
       this.chapterStartedAt=this.time.now;
       if(!new URLSearchParams(window.location.search).has('map'))this.enterMap('sprout_camp','camp',true);
       this.refreshHud();this.requestInventoryRefresh();
@@ -446,7 +445,6 @@ class SkyberryHollow extends Phaser.Scene {
     this.paperdollAnchors = this.cache.json.get('paperdoll-anchors');
     this.capeLayer = this.add.sprite(108, 594, 'cape-indigo-motion', 0).setDepth(3.3);
     this.player = this.physics.add.sprite(108, 594, 'body-motion', 0).setVisible(false).setCollideWorldBounds(true).setSize(44, 84).setOffset(26, 42);
-    this.playerNameTag=crispText(this.add.text(108,642,this.playerName.toUpperCase(),{fontFamily:UI_FONT,fontSize:'11px',fontStyle:'bold',color:'#fff6d5',backgroundColor:'rgba(27,43,69,.9)',padding:{x:5,y:2},stroke:'#273753',strokeThickness:1}).setOrigin(.5).setDepth(7));
     this.bodyLayer = this.add.sprite(108, 594, 'body-motion', 0).setDepth(4);
     this.clothesLayer = this.add.sprite(108, 594, 'clothes-traveler-motion', 0).setDepth(4.4);
     this.hatLayer = this.add.sprite(108, 594, 'hat-traveler-motion', 0).setDepth(5);
@@ -795,7 +793,6 @@ class SkyberryHollow extends Phaser.Scene {
     this.bodyLayer.setPosition(Math.round(this.player.x), Math.round(this.player.y))
       .setOrigin(originRoot / anchor.width, anchor.originY)
       .setFlipX(this.player.flipX);
-    if(this.playerNameTag)this.playerNameTag.setPosition(Math.round(this.player.x),Math.round(this.player.y+49));
   }
 
   syncEquipmentLayers() {
