@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '134';
+const ASSET_VERSION = '135';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -309,11 +309,16 @@ class GameAudio {
   ensure(){
     if(this.context)return true;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return false;
     this.context=new AudioContext();this.master=this.context.createGain();this.music=this.context.createGain();this.effects=this.context.createGain();
-    this.master.gain.value=.55;this.music.gain.value=.20;this.effects.gain.value=.46;this.music.connect(this.master);this.effects.connect(this.master);this.master.connect(this.context.destination);return true;
+    this.master.gain.value=.82;this.music.gain.value=.42;this.effects.gain.value=.68;this.music.connect(this.master);this.effects.connect(this.master);this.master.connect(this.context.destination);return true;
   }
-  start(){if(!this.ensure())return;this.context.resume();if(this.running)return;this.running=true;this.step=0;this.loop();}
+  start(){if(!this.ensure())return;const firstStart=!this.running;this.context.resume();if(!firstStart)return;this.running=true;this.step=0;this.loop();this.sfx('startup');}
+  activateOrToggle(){
+    if(!this.ensure())return this.muted;
+    if(!this.running||this.context.state!=='running'){this.muted=false;this.master.gain.setTargetAtTime(.82,this.context.currentTime,.02);this.start();return false;}
+    return this.toggleMute();
+  }
   setTheme(theme){if(this.theme===theme)return;this.theme=theme;this.step=0;}
-  toggleMute(){this.muted=!this.muted;if(this.master&&this.context)this.master.gain.setTargetAtTime(this.muted?0:.55,this.context.currentTime,.03);return this.muted;}
+  toggleMute(){this.muted=!this.muted;if(this.master&&this.context)this.master.gain.setTargetAtTime(this.muted?0:.82,this.context.currentTime,.03);return this.muted;}
   frequency(midi){return 440*Math.pow(2,(midi-69)/12);}
   note(midi,duration=.18,type='square',volume=.08,when=0,destination=this.music){
     if(!this.context||this.muted)return;const now=this.context.currentTime+when,osc=this.context.createOscillator(),gain=this.context.createGain();
@@ -329,8 +334,8 @@ class GameAudio {
       'crownwind-field':{tempo:225,melody:[64,67,71,74,71,67,66,69],bass:[40,43,38,42],wave:'square'},
       interior:{tempo:380,melody:[72,null,76,null,79,null,76,null],bass:[48,53,55,53],wave:'sine'},
     },theme=themes[this.theme]||themes['dawnleaf-town'],index=this.step%theme.melody.length,midi=theme.melody[index];
-    if(midi)this.note(midi,.20,theme.wave,.055);if(this.step%2===0)this.note(theme.bass[Math.floor(this.step/2)%theme.bass.length],.32,'triangle',.045);
-    if(this.step%4===2)this.note(84,.05,'square',.018);this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);
+    if(midi)this.note(midi,.20,theme.wave,.13);if(this.step%2===0)this.note(theme.bass[Math.floor(this.step/2)%theme.bass.length],.32,'triangle',.09);
+    if(this.step%4===2)this.note(84,.05,'square',.04);this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);
   }
   sfx(name){
     if(!this.ensure()||this.muted)return;this.context.resume();const play=(midi,duration,type='square',volume=.14,delay=0)=>this.note(midi,duration,type,volume,delay,this.effects);
@@ -339,7 +344,7 @@ class GameAudio {
       hit:()=>{play(43,.07,'sawtooth',.16);play(38,.09,'square',.10,.035);},hurt:()=>{play(52,.10,'sawtooth',.15);play(45,.16,'triangle',.12,.07);},
       defeat:()=>{play(60,.08,'square',.12);play(55,.08,'square',.10,.07);play(48,.18,'triangle',.12,.14);},pickup:()=>{play(76,.07,'square',.10);play(81,.08,'square',.09,.055);play(88,.12,'triangle',.08,.11);},
       chest:()=>{play(60,.10,'triangle',.11);play(67,.10,'triangle',.11,.09);play(72,.20,'triangle',.12,.18);},portal:()=>{play(60,.12,'sine',.10);play(67,.15,'sine',.10,.08);play(79,.28,'sine',.10,.16);},
-      dialogue:()=>play(79,.055,'triangle',.055),ui:()=>play(72,.055,'square',.06),complete:()=>{[60,64,67,72,76,79,84].forEach((note,index)=>play(note,.24,index<3?'triangle':'square',.10,index*.085));},
+      dialogue:()=>play(79,.055,'triangle',.08),ui:()=>play(72,.055,'square',.10),startup:()=>{play(67,.10,'triangle',.13);play(72,.12,'triangle',.14,.09);play(79,.22,'square',.12,.18);},complete:()=>{[60,64,67,72,76,79,84].forEach((note,index)=>play(note,.24,index<3?'triangle':'square',.13,index*.085));},
     };(sounds[name]||sounds.ui)();
   }
 }
@@ -1634,7 +1639,7 @@ class SkyberryHollow extends Phaser.Scene {
     questButton.on('pointerover',()=>questButton.setFillStyle(0x556b91));questButton.on('pointerout',()=>questButton.setFillStyle(0x35456f));questButton.on('pointerdown',()=>this.toggleQuestPanel());
     fixed(this.add.text(W-120,70,'☷',{fontFamily:UI_FONT,fontSize:'21px',color:'#ffe2a0'}).setOrigin(.5).setDepth(22));
     const audioButton=fixed(this.add.rectangle(W-166,70,38,38,0x35456f,.96).setStrokeStyle(2,0xa9d5b3).setDepth(21).setInteractive({useHandCursor:true}));
-    audioButton.on('pointerover',()=>audioButton.setFillStyle(0x556b91));audioButton.on('pointerout',()=>audioButton.setFillStyle(0x35456f));audioButton.on('pointerdown',()=>{this.audio.start();this.audio.toggleMute();this.audioHudText.setText(this.audio.muted?'×':'♪');});
+    audioButton.on('pointerover',()=>audioButton.setFillStyle(0x556b91));audioButton.on('pointerout',()=>audioButton.setFillStyle(0x35456f));audioButton.on('pointerdown',()=>{const muted=this.audio.activateOrToggle();this.audioHudText.setText(muted?'×':'♪');});
     this.audioHudText=fixed(this.add.text(W-166,70,'♪',{fontFamily:UI_FONT,fontSize:'19px',fontStyle:'bold',color:'#dcffe5'}).setOrigin(.5).setDepth(22));
     this.interactionText=fixed(this.add.text(W/2,H-46,'',{fontFamily:UI_FONT,fontSize:'14px',fontStyle:'bold',color:'#fff5c4',backgroundColor:'rgba(25,45,72,.94)',padding:{x:12,y:7}}).setOrigin(.5).setDepth(24).setVisible(false));
     this.refreshHud();
@@ -1925,7 +1930,7 @@ class SkyberryHollow extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keys.I)) this.toggleInventory();
     if (Phaser.Input.Keyboard.JustDown(this.keys.M)) this.toggleWorldMap();
     if (Phaser.Input.Keyboard.JustDown(this.keys.J)) this.toggleQuestPanel();
-    if (Phaser.Input.Keyboard.JustDown(this.keys.V)){this.audio.toggleMute();if(this.audioHudText)this.audioHudText.setText(this.audio.muted?'×':'♪');}
+    if (Phaser.Input.Keyboard.JustDown(this.keys.V)){const muted=this.audio.activateOrToggle();if(this.audioHudText)this.audioHudText.setText(muted?'×':'♪');}
     if(this.questPanelOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     if(this.worldMapOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     if (this.inventoryOpen) {
