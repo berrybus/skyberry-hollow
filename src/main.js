@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '133';
+const ASSET_VERSION = '134';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -304,6 +304,46 @@ const STAT_INFO = {
   int:'Arcane weapon power', vit:'Maximum HP and defense',
 };
 
+class GameAudio {
+  constructor(){this.context=null;this.master=null;this.music=null;this.effects=null;this.running=false;this.muted=false;this.theme='dawnleaf-town';this.step=0;this.timer=null;}
+  ensure(){
+    if(this.context)return true;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return false;
+    this.context=new AudioContext();this.master=this.context.createGain();this.music=this.context.createGain();this.effects=this.context.createGain();
+    this.master.gain.value=.55;this.music.gain.value=.20;this.effects.gain.value=.46;this.music.connect(this.master);this.effects.connect(this.master);this.master.connect(this.context.destination);return true;
+  }
+  start(){if(!this.ensure())return;this.context.resume();if(this.running)return;this.running=true;this.step=0;this.loop();}
+  setTheme(theme){if(this.theme===theme)return;this.theme=theme;this.step=0;}
+  toggleMute(){this.muted=!this.muted;if(this.master&&this.context)this.master.gain.setTargetAtTime(this.muted?0:.55,this.context.currentTime,.03);return this.muted;}
+  frequency(midi){return 440*Math.pow(2,(midi-69)/12);}
+  note(midi,duration=.18,type='square',volume=.08,when=0,destination=this.music){
+    if(!this.context||this.muted)return;const now=this.context.currentTime+when,osc=this.context.createOscillator(),gain=this.context.createGain();
+    osc.type=type;osc.frequency.setValueAtTime(this.frequency(midi),now);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(volume,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+    osc.connect(gain);gain.connect(destination);osc.start(now);osc.stop(now+duration+.03);
+  }
+  loop(){
+    if(!this.running)return;
+    const themes={
+      'dawnleaf-town':{tempo:310,melody:[72,76,79,76,74,77,81,77],bass:[48,48,53,55],wave:'triangle'},
+      'dawnleaf-field':{tempo:245,melody:[69,72,76,72,67,71,74,71],bass:[45,48,43,47],wave:'square'},
+      'crownwind-town':{tempo:330,melody:[67,71,74,79,76,74,71,69],bass:[43,50,46,48],wave:'triangle'},
+      'crownwind-field':{tempo:225,melody:[64,67,71,74,71,67,66,69],bass:[40,43,38,42],wave:'square'},
+      interior:{tempo:380,melody:[72,null,76,null,79,null,76,null],bass:[48,53,55,53],wave:'sine'},
+    },theme=themes[this.theme]||themes['dawnleaf-town'],index=this.step%theme.melody.length,midi=theme.melody[index];
+    if(midi)this.note(midi,.20,theme.wave,.055);if(this.step%2===0)this.note(theme.bass[Math.floor(this.step/2)%theme.bass.length],.32,'triangle',.045);
+    if(this.step%4===2)this.note(84,.05,'square',.018);this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);
+  }
+  sfx(name){
+    if(!this.ensure()||this.muted)return;this.context.resume();const play=(midi,duration,type='square',volume=.14,delay=0)=>this.note(midi,duration,type,volume,delay,this.effects);
+    const sounds={
+      jump:()=>{play(69,.09,'square',.11);play(76,.12,'square',.09,.06);},attack:()=>{play(55,.05,'sawtooth',.13);play(48,.10,'square',.08,.045);},
+      hit:()=>{play(43,.07,'sawtooth',.16);play(38,.09,'square',.10,.035);},hurt:()=>{play(52,.10,'sawtooth',.15);play(45,.16,'triangle',.12,.07);},
+      defeat:()=>{play(60,.08,'square',.12);play(55,.08,'square',.10,.07);play(48,.18,'triangle',.12,.14);},pickup:()=>{play(76,.07,'square',.10);play(81,.08,'square',.09,.055);play(88,.12,'triangle',.08,.11);},
+      chest:()=>{play(60,.10,'triangle',.11);play(67,.10,'triangle',.11,.09);play(72,.20,'triangle',.12,.18);},portal:()=>{play(60,.12,'sine',.10);play(67,.15,'sine',.10,.08);play(79,.28,'sine',.10,.16);},
+      dialogue:()=>play(79,.055,'triangle',.055),ui:()=>play(72,.055,'square',.06),complete:()=>{[60,64,67,72,76,79,84].forEach((note,index)=>play(note,.24,index<3?'triangle':'square',.10,index*.085));},
+    };(sounds[name]||sounds.ui)();
+  }
+}
+
 class SkyberryHollow extends Phaser.Scene {
   constructor() { super('hollow'); }
 
@@ -356,11 +396,13 @@ class SkyberryHollow extends Phaser.Scene {
   }
 
   create() {
+    this.audio=new GameAudio();
     this.game.canvas.setAttribute('tabindex','0');
-    this.input.on('pointerdown',()=>this.game.canvas.focus());
+    this.input.on('pointerdown',()=>{this.game.canvas.focus();this.audio.start();});
     this.setupInventory();
     this.playerName=(localStorage.getItem('skyberry_name')||'Lumi').slice(0,14);
     const startAdventure=event=>{
+      this.audio.start();
       this.playerName=(event.detail?.name||'Lumi').slice(0,14);
       this.chapterStartedAt=this.time.now;
       if(!new URLSearchParams(window.location.search).has('map'))this.enterMap('sprout_camp','camp',true);
@@ -407,7 +449,7 @@ class SkyberryHollow extends Phaser.Scene {
     this.createPortals();
     this.createChests();
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys('A,E,I,J,M,Q,S,SPACE');
+    this.keys = this.input.keyboard.addKeys('A,E,I,J,M,Q,S,V,SPACE');
     if(document.activeElement?.id==='hero-name')this.input.keyboard.enabled=false;
     window.addEventListener('skyberry:namefocus',event=>{
       if(!this.input?.keyboard)return;
@@ -1124,6 +1166,7 @@ class SkyberryHollow extends Phaser.Scene {
 
   openChest(chest) {
     if(!chest||chest.opened)return;
+    this.audio.sfx('chest');
     chest.opened=true;chest.sprite.setTexture('item-chest-open');
     this.spawnDrop(chest.sprite.x-8,chest.sprite.y-20,'coin',{amount:Phaser.Math.Between(18,34)});
     this.spawnDrop(chest.sprite.x+8,chest.sprite.y-20,'potion',{amount:2});
@@ -1206,6 +1249,7 @@ class SkyberryHollow extends Phaser.Scene {
       }
     }
     const returnSpawn=this.currentMap?.kind==='interior'&&MAP_DEFINITIONS[portal.to]?.kind==='town'?'market':portal.spawn;
+    this.audio.sfx('portal');
     this.enterMap(portal.to,returnSpawn);
   }
 
@@ -1217,6 +1261,7 @@ class SkyberryHollow extends Phaser.Scene {
       this.currentMap=map;
       this.currentMapId=map.id;
       this.currentRegion=map.region;
+      this.audio?.setTheme(map.kind==='interior'?'interior':`${map.region}-${map.kind==='town'?'town':'field'}`);
       let storyNotice='';
       if(this.mainQuest?.stage===4&&['stonewatch','greenbloom','starwillow'].includes(map.id)){
         this.mainQuest.echoes[map.id]=true;const heard=Object.keys(this.mainQuest.echoes).length;
@@ -1281,6 +1326,7 @@ class SkyberryHollow extends Phaser.Scene {
 
   startDialoguePage(){
     if(this.dialogueTypeEvent)this.dialogueTypeEvent.remove(false);
+    this.audio.sfx('dialogue');
     this.dialogueFullText=this.dialoguePages[this.dialoguePageIndex]||'';this.dialogueCharacters=Array.from(this.dialogueFullText);this.dialogueCharacterIndex=0;this.dialogueTyping=true;
     this.dialogueBodyText.setText('');this.updateDialogueHint('REVEAL');
     this.dialogueTypeEvent=this.time.addEvent({delay:18,loop:true,callback:()=>{
@@ -1354,6 +1400,7 @@ class SkyberryHollow extends Phaser.Scene {
 
   showChapterOneComplete(){
     if(this.chapterOnePanel)return;
+    this.audio.sfx('complete');
     const elapsed=Math.max(1000,this.time.now-this.chapterStartedAt),seconds=Math.floor(elapsed/1000),stored=Number(localStorage.getItem('skyberry_chapter_one_best')||0);
     if(!stored||seconds<stored)localStorage.setItem('skyberry_chapter_one_best',String(seconds));
     localStorage.setItem('skyberry_chapter_one_complete','true');
@@ -1586,6 +1633,9 @@ class SkyberryHollow extends Phaser.Scene {
     const questButton=fixed(this.add.rectangle(W-120,70,38,38,0x35456f,.96).setStrokeStyle(2,0xffcf78).setDepth(21).setInteractive({useHandCursor:true}));
     questButton.on('pointerover',()=>questButton.setFillStyle(0x556b91));questButton.on('pointerout',()=>questButton.setFillStyle(0x35456f));questButton.on('pointerdown',()=>this.toggleQuestPanel());
     fixed(this.add.text(W-120,70,'☷',{fontFamily:UI_FONT,fontSize:'21px',color:'#ffe2a0'}).setOrigin(.5).setDepth(22));
+    const audioButton=fixed(this.add.rectangle(W-166,70,38,38,0x35456f,.96).setStrokeStyle(2,0xa9d5b3).setDepth(21).setInteractive({useHandCursor:true}));
+    audioButton.on('pointerover',()=>audioButton.setFillStyle(0x556b91));audioButton.on('pointerout',()=>audioButton.setFillStyle(0x35456f));audioButton.on('pointerdown',()=>{this.audio.start();this.audio.toggleMute();this.audioHudText.setText(this.audio.muted?'×':'♪');});
+    this.audioHudText=fixed(this.add.text(W-166,70,'♪',{fontFamily:UI_FONT,fontSize:'19px',fontStyle:'bold',color:'#dcffe5'}).setOrigin(.5).setDepth(22));
     this.interactionText=fixed(this.add.text(W/2,H-46,'',{fontFamily:UI_FONT,fontSize:'14px',fontStyle:'bold',color:'#fff5c4',backgroundColor:'rgba(25,45,72,.94)',padding:{x:12,y:7}}).setOrigin(.5).setDepth(24).setVisible(false));
     this.refreshHud();
   }
@@ -1683,6 +1733,7 @@ class SkyberryHollow extends Phaser.Scene {
 
   collectDrop(player,drop) {
     if(!drop.active)return;
+    this.audio.sfx('pickup');
     const kind=drop.getData('kind');let message='';
     if(kind==='coin'){const amount=drop.getData('amount')||1;this.currency+=amount;message=`+${amount} COINS`;}
     else if(kind==='material'){
@@ -1717,6 +1768,7 @@ class SkyberryHollow extends Phaser.Scene {
   meleeAttack() {
     const grounded = this.player.body.onFloor() || this.player.body.blocked.down || this.player.body.touching.down;
     if (!this.player.getData('canAttack')) return;
+    this.audio.sfx('attack');
     const weapon = this.currentWeapon();
     const attack = ATTACKS[weapon];
     this.player.setData({ canAttack:false, attacking:true, attackAirborne:!grounded });
@@ -1779,6 +1831,7 @@ class SkyberryHollow extends Phaser.Scene {
 
   damageEnemy(enemy, amount, critical=false) {
     if(!enemy.getData('alive')) return;
+    this.audio.sfx('hit');
     const popup=crispText(this.add.text(enemy.x,enemy.y-30,`${critical?'CRIT ':''}${amount}`,{fontFamily:UI_FONT,fontSize:critical?'22px':'18px',fontStyle:'bold',color:critical?'#ffe07d':'#ffffff',stroke:'#5b3a5f',strokeThickness:4})).setOrigin(.5).setDepth(35);
     this.uiCamera?.ignore(popup);
     this.tweens.add({targets:popup,y:popup.y-24,alpha:0,duration:750,onComplete:()=>popup.destroy()});
@@ -1792,6 +1845,7 @@ class SkyberryHollow extends Phaser.Scene {
     const spawn=enemy.getData('spawn');
     const region=enemy.getData('region');
     enemy.setData('alive',false);enemy.body.enable=false;enemy.setVelocity(0,0);
+    this.audio.sfx('defeat');
     this.totalKills+=1;
     ['healthBack','healthFill','healthLabel'].forEach(key=>enemy.getData(key)?.setVisible(false));
     if(this.quest.tutorial==='active'&&region==='dawnleaf')this.quest.mobs+=1;
@@ -1838,6 +1892,7 @@ class SkyberryHollow extends Phaser.Scene {
   }
   hitPlayer(player,wisp) {
     if(this.time.now<(player.getData('invulnerableUntil')||0))return;
+    this.audio.sfx('hurt');
     const invulnerabilityMs=850;player.setData('hurt',true);player.setData('invulnerableUntil',this.time.now+invulnerabilityMs);player.setData('knockbackUntil',this.time.now+180);
     const raw=Math.max(5,Math.round(15+this.progression.level*1.5-this.defense()*.7));const damage=Math.max(1,Math.round(raw*this.classProfile().damageTaken));
     this.hpValue=Math.max(0,this.hpValue-damage);this.refreshHud();player.setVelocity(wisp.x<player.x?80:-80,-70);
@@ -1870,6 +1925,7 @@ class SkyberryHollow extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keys.I)) this.toggleInventory();
     if (Phaser.Input.Keyboard.JustDown(this.keys.M)) this.toggleWorldMap();
     if (Phaser.Input.Keyboard.JustDown(this.keys.J)) this.toggleQuestPanel();
+    if (Phaser.Input.Keyboard.JustDown(this.keys.V)){this.audio.toggleMute();if(this.audioHudText)this.audioHudText.setText(this.audio.muted?'×':'♪');}
     if(this.questPanelOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     if(this.worldMapOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     if (this.inventoryOpen) {
@@ -1893,6 +1949,7 @@ class SkyberryHollow extends Phaser.Scene {
     // E talks to NPCs; Up is reserved for nearby travel gates.
     const pressedJump = Phaser.Input.Keyboard.JustDown(this.keys.SPACE);
     if (pressedJump && this.time.now - this.lastGrounded < 140) {
+      this.audio.sfx('jump');
       this.player.setData('activeSlope',null);
       this.player.setVelocityY(JUMP_VELOCITY);
       this.lastGrounded = 0;
