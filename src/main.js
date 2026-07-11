@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '138';
+const ASSET_VERSION = '139';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -305,13 +305,13 @@ const STAT_INFO = {
 };
 
 class GameAudio {
-  constructor(){this.context=null;this.master=null;this.music=null;this.effects=null;this.running=false;this.muted=false;this.theme='dawnleaf-town';this.step=0;this.timer=null;}
+  constructor(){this.context=null;this.master=null;this.music=null;this.effects=null;this.running=false;this.muted=false;this.theme='title';this.step=0;this.timer=null;}
   ensure(){
     if(this.context)return true;const AudioContext=window.AudioContext||window.webkitAudioContext;if(!AudioContext)return false;
     this.context=new AudioContext();this.master=this.context.createGain();this.music=this.context.createGain();this.effects=this.context.createGain();
     this.master.gain.value=.82;this.music.gain.value=.42;this.effects.gain.value=.68;this.music.connect(this.master);this.effects.connect(this.master);this.master.connect(this.context.destination);return true;
   }
-  start(){if(!this.ensure())return;const firstStart=!this.running;this.context.resume();if(!firstStart)return;this.running=true;this.step=0;this.loop();this.sfx('startup');}
+  start(){if(!this.ensure())return;const firstStart=!this.running;this.context.resume();if(!firstStart)return;this.running=true;this.step=0;this.loop();if(this.theme!=='title')this.sfx('startup');}
   activateOrToggle(){
     if(!this.ensure())return this.muted;
     if(!this.running||this.context.state!=='running'){this.muted=false;this.master.gain.setTargetAtTime(.82,this.context.currentTime,.02);this.start();return false;}
@@ -337,6 +337,7 @@ class GameAudio {
   loop(){
     if(!this.running)return;
     const themes={
+      title:{tempo:230,a:[76,79,83,86,83,79,76,71,74,76,79,83,81,79,76,74],b:[71,74,79,81,83,86,88,86,83,81,79,76,74,76,79,83],c:[88,86,83,81,79,76,74,71,76,79,83,86,84,83,79,76],progressions:[[48,55,52,53],[45,52,55,48],[48,53,45,55],[53,55,48,48]],quality:4,wave:'sine'},
       'dawnleaf-town':{tempo:175,a:[72,76,79,84,81,79,76,74,72,77,81,84,83,81,79,76],b:[76,79,81,88,86,84,81,79,77,81,84,89,88,84,81,79],c:[84,83,81,79,77,76,74,72,76,79,84,83,81,79,76,72],progressions:[[48,53,45,55],[48,50,53,55],[45,53,48,55],[53,55,48,48]],quality:4,wave:'triangle'},
       'dawnleaf-field':{tempo:145,a:[69,72,76,81,79,76,72,74,76,79,83,86,84,81,79,74],b:[81,79,76,72,74,77,81,84,83,79,76,74,72,76,79,81],c:[86,84,81,79,83,81,79,76,74,76,79,81,76,72,69,69],progressions:[[45,41,48,43],[45,48,41,43],[41,43,45,48],[48,43,45,45]],quality:3,wave:'square'},
       'crownwind-town':{tempo:190,a:[67,71,74,79,83,81,79,74,69,72,76,81,84,83,81,76],b:[74,79,83,86,84,81,79,76,72,76,81,84,83,79,76,74],c:[86,84,83,81,79,76,74,72,76,79,83,81,79,76,74,67],progressions:[[43,50,48,46],[43,46,50,48],[48,46,43,50],[46,50,43,43]],quality:3,wave:'triangle'},
@@ -345,6 +346,19 @@ class GameAudio {
     },theme=themes[this.theme]||themes['dawnleaf-town'],step=this.step%16,section=Math.floor(this.step/16)%4,cycle=Math.floor(this.step/64)%4,keyShift=[0,5,-2,0][cycle],
       melody=section===0?theme.a:(section===1?theme.b:(section===2?theme.a.map((note,index)=>note+(index%4===0?-12:(index%4===3?5:0))):theme.c)),
       midi=melody[step]+keyShift,root=theme.progressions[section][Math.floor(step/4)%4]+keyShift,third=theme.quality,fifth=7,dynamics=[1,.88,.66,1.12][section]*[1,.94,.78,1.08][cycle];
+    if(this.theme==='title'){
+      // Original title-screen arrangement: a music-box lead over warm,
+      // slowly changing chords, with a small countermelody every other bar.
+      this.note(midi,.46,'sine',.095*dynamics);
+      this.note(midi+12,.18,'triangle',.028*dynamics,.018);
+      if(step%2===0)this.note(root,.72,'sine',.055*dynamics);
+      if(step%4===0){
+        [root+12,root+third+12,root+fifth+12].forEach((note,index)=>this.note(note,1.22,'triangle',.022*dynamics,index*.035));
+        this.note(root+24,.34,'sine',.035*dynamics,.08);
+      }
+      if(section>=1&&step%4===2)this.note(root+19+(section===3?2:0),.5,'triangle',.032*dynamics,.04);
+      this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);return;
+    }
     // Deliberately maximal: lead, octave double, arpeggio, bass, power chord,
     // and a deterministic chromatic grace note all compete for heroic excess.
     this.note(midi,.18,section===2?'triangle':theme.wave,.105*dynamics);if(section!==2||step%2===0)this.note(midi+12,.10,'square',.035*dynamics,.025);
@@ -420,6 +434,9 @@ class SkyberryHollow extends Phaser.Scene {
 
   create() {
     this.audio=new GameAudio();
+    const unlockTitleMusic=()=>this.audio.start();
+    window.addEventListener('pointerdown',unlockTitleMusic,{once:true,capture:true});
+    window.addEventListener('keydown',unlockTitleMusic,{once:true,capture:true});
     this.game.canvas.setAttribute('tabindex','0');
     this.input.on('pointerdown',()=>{this.game.canvas.focus();this.audio.start();});
     this.setupInventory();
