@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '135';
+const ASSET_VERSION = '136';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -325,17 +325,35 @@ class GameAudio {
     osc.type=type;osc.frequency.setValueAtTime(this.frequency(midi),now);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(volume,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
     osc.connect(gain);gain.connect(destination);osc.start(now);osc.stop(now+duration+.03);
   }
+  kick(when=0){
+    if(!this.context||this.muted)return;const now=this.context.currentTime+when,osc=this.context.createOscillator(),gain=this.context.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(145,now);osc.frequency.exponentialRampToValueAtTime(42,now+.16);gain.gain.setValueAtTime(.18,now);gain.gain.exponentialRampToValueAtTime(.0001,now+.18);osc.connect(gain);gain.connect(this.music);osc.start(now);osc.stop(now+.2);
+  }
+  noise(duration=.08,volume=.045,when=0){
+    if(!this.context||this.muted)return;const sampleRate=this.context.sampleRate,buffer=this.context.createBuffer(1,Math.floor(sampleRate*duration),sampleRate),data=buffer.getChannelData(0);
+    for(let index=0;index<data.length;index++)data[index]=(Math.random()*2-1)*(1-index/data.length);const source=this.context.createBufferSource(),filter=this.context.createBiquadFilter(),gain=this.context.createGain(),now=this.context.currentTime+when;
+    source.buffer=buffer;filter.type='highpass';filter.frequency.value=volume>.07?900:4200;gain.gain.setValueAtTime(volume,now);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);source.connect(filter);filter.connect(gain);gain.connect(this.music);source.start(now);source.stop(now+duration);
+  }
   loop(){
     if(!this.running)return;
     const themes={
-      'dawnleaf-town':{tempo:310,melody:[72,76,79,76,74,77,81,77],bass:[48,48,53,55],wave:'triangle'},
-      'dawnleaf-field':{tempo:245,melody:[69,72,76,72,67,71,74,71],bass:[45,48,43,47],wave:'square'},
-      'crownwind-town':{tempo:330,melody:[67,71,74,79,76,74,71,69],bass:[43,50,46,48],wave:'triangle'},
-      'crownwind-field':{tempo:225,melody:[64,67,71,74,71,67,66,69],bass:[40,43,38,42],wave:'square'},
-      interior:{tempo:380,melody:[72,null,76,null,79,null,76,null],bass:[48,53,55,53],wave:'sine'},
-    },theme=themes[this.theme]||themes['dawnleaf-town'],index=this.step%theme.melody.length,midi=theme.melody[index];
-    if(midi)this.note(midi,.20,theme.wave,.13);if(this.step%2===0)this.note(theme.bass[Math.floor(this.step/2)%theme.bass.length],.32,'triangle',.09);
-    if(this.step%4===2)this.note(84,.05,'square',.04);this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);
+      'dawnleaf-town':{tempo:175,a:[72,76,79,84,81,79,76,74,72,77,81,84,83,81,79,76],b:[76,79,81,88,86,84,81,79,77,81,84,89,88,84,81,79],c:[84,83,81,79,77,76,74,72,76,79,84,83,81,79,76,72],progressions:[[48,53,45,55],[48,50,53,55],[45,53,48,55],[53,55,48,48]],quality:4,wave:'triangle'},
+      'dawnleaf-field':{tempo:145,a:[69,72,76,81,79,76,72,74,76,79,83,86,84,81,79,74],b:[81,79,76,72,74,77,81,84,83,79,76,74,72,76,79,81],c:[86,84,81,79,83,81,79,76,74,76,79,81,76,72,69,69],progressions:[[45,41,48,43],[45,48,41,43],[41,43,45,48],[48,43,45,45]],quality:3,wave:'square'},
+      'crownwind-town':{tempo:190,a:[67,71,74,79,83,81,79,74,69,72,76,81,84,83,81,76],b:[74,79,83,86,84,81,79,76,72,76,81,84,83,79,76,74],c:[86,84,83,81,79,76,74,72,76,79,83,81,79,76,74,67],progressions:[[43,50,48,46],[43,46,50,48],[48,46,43,50],[46,50,43,43]],quality:3,wave:'triangle'},
+      'crownwind-field':{tempo:135,a:[64,67,71,76,74,71,67,66,64,69,72,76,78,76,72,67],b:[76,74,71,67,69,72,76,79,78,74,72,69,67,71,74,76],c:[79,78,76,74,72,71,69,67,66,69,72,71,67,66,64,64],progressions:[[40,38,45,43],[40,43,38,45],[45,40,43,38],[38,43,40,40]],quality:3,wave:'sawtooth'},
+      interior:{tempo:205,a:[72,76,79,88,84,79,76,83,72,77,81,89,86,81,77,84],b:[79,83,88,91,88,84,81,79,77,81,86,89,86,83,81,76],c:[91,88,86,84,83,81,79,77,76,79,84,83,81,79,76,72],progressions:[[48,53,45,55],[48,55,53,50],[45,48,53,55],[53,55,48,48]],quality:4,wave:'sine'},
+    },theme=themes[this.theme]||themes['dawnleaf-town'],step=this.step%16,section=Math.floor(this.step/16)%4,cycle=Math.floor(this.step/64)%4,keyShift=[0,5,-2,0][cycle],
+      melody=section===0?theme.a:(section===1?theme.b:(section===2?theme.a.map((note,index)=>note+(index%4===0?-12:(index%4===3?5:0))):theme.c)),
+      midi=melody[step]+keyShift,root=theme.progressions[section][Math.floor(step/4)%4]+keyShift,third=theme.quality,fifth=7,dynamics=[1,.88,.66,1.12][section]*[1,.94,.78,1.08][cycle];
+    // Deliberately maximal: lead, octave double, arpeggio, bass, power chord,
+    // and a deterministic chromatic grace note all compete for heroic excess.
+    this.note(midi,.18,section===2?'triangle':theme.wave,.105*dynamics);if(section!==2||step%2===0)this.note(midi+12,.10,'square',.035*dynamics,.025);
+    this.note(root+24+[0,third,fifth,12][(step+section)%4],.11,section===1?'sawtooth':'square',.045*dynamics,.01);
+    if(step%2===0){this.note(root,.28,'triangle',.09*dynamics);if(section!==2)this.note(root+12,.18,'sawtooth',.025*dynamics);}
+    if(step%4===0){[root,root+third,root+fifth,root+12].forEach((note,index)=>this.note(note,section===2?.82:.56,index%2?'triangle':'sawtooth',.026*dynamics,index*.012));if(section!==2||step%8===0)this.kick();}
+    if(step===7||step===15){this.note(midi-1,.055,'square',.055*dynamics);this.note(midi+7,.22,'sawtooth',.04*dynamics,.055);}
+    if(section===3&&step>=12){this.kick(step%2*.045);this.noise(.06,.055,step%2*.035);}else if(step===4||step===12)this.noise(.13,.09*dynamics);else if(step%2===1&&section!==2)this.noise(.045,.025*dynamics);
+    this.step++;this.timer=setTimeout(()=>this.loop(),theme.tempo);
   }
   sfx(name){
     if(!this.ensure()||this.muted)return;this.context.resume();const play=(midi,duration,type='square',volume=.14,delay=0)=>this.note(midi,duration,type,volume,delay,this.effects);
