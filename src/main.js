@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '139';
+const ASSET_VERSION = '140';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -103,7 +103,7 @@ const MAP_DEFINITIONS = {
     id:'moonlit_boughs',kind:'field',art:'moonlit-boughs',x:19152,width:1344,region:'crownwind',terrainTint:0x9c83cf,
     label:'CROWNWIND REACH • MOONLIT BOUGHS',spawn:{left:[108,594],right:[1236,594]},
     platforms:[[276,564,144],[516,468,144],[720,372,216],[1032,468,144],[1200,564,96]],
-    exits:[{x:60,to:'starwillow',spawn:'right',label:'STARWILLOW GROVE'},{x:1284,to:'crystal_hollow',spawn:'left',label:'CRYSTAL HOLLOW'},{x:630,to:'greenbloom',spawn:'right',label:'OWLKEEPER PATH'}],
+    exits:[{x:60,to:'starwillow',spawn:'right',label:'STARWILLOW GROVE'},{x:1284,to:'crystal_hollow',spawn:'left',label:'CRYSTAL-LIT DESCENT'},{x:630,to:'greenbloom',spawn:'right',label:'OWLKEEPER PATH'}],
     npcs:[],enemies:[[520,634,380,720,'starcrawler'],[1030,634,880,1190,'starcrawler']],berries:[[288,568],[492,508],[696,448],[900,388],[1104,448]],chests:[[820,372]],
   },
   crystal_hollow: {
@@ -217,7 +217,7 @@ const MAIN_STORY_STAGES=[
   'Show the black-glass chime to Captain Sol in Tidehollow.',
   'Find June, Gullhaven’s historian, before the tide erases her harbor records.',
   'Listen for root-echoes in Stonewatch, Greenbloom, and Starwillow.',
-  'Find the hidden descent into Crystal Hollow.',
+  'Go east from Starwillow through Moonlit Boughs. Take the crystal-lit descent at the far edge.',
   'Open the sealed reliquary where the seventh root-bell sleeps.',
   'Return to Mira with the awakened bell.',
   'The Hollow Chime is awake. The road beyond Crownwind is waiting.',
@@ -1847,15 +1847,20 @@ class SkyberryHollow extends Phaser.Scene {
   shootProjectile(kind,damage,critical) {
     const facing=this.player.getData('facing');
     const texture=kind==='arrow'?'arrow-shot':'orb-shot';
-    const projectile=this.projectiles.create(this.player.x+facing*22,this.player.y-8,texture).setDepth(7).setFlipX(facing<0);
+    // Ground enemies occupy the lower half of their visual canvas. Launch at
+    // hand/chest height with a forgiving authored hitbox so ranged attacks
+    // cross that body instead of passing over it.
+    const projectile=this.projectiles.create(this.player.x+facing*26,this.player.y+10,texture).setDepth(7).setFlipX(facing<0);
     this.uiCamera?.ignore(projectile);
-    projectile.setVelocityX(facing*(kind==='arrow'?300:230));
-    projectile.setData({damage,critical});
+    projectile.setScale(kind==='arrow'?1.4:2.25);
+    projectile.body.setSize(kind==='arrow'?24:16,kind==='arrow'?10:16,true);
+    projectile.setVelocityX(facing*(kind==='arrow'?330:285));
+    projectile.setData({damage,critical,mapId:this.currentMapId});
     this.time.delayedCall(1100,()=>{if(projectile.active)projectile.destroy();});
   }
 
   projectileHit(projectile,enemy) {
-    if(!projectile.active||!enemy.active||!enemy.getData('alive'))return;
+    if(!projectile.active||!enemy.active||!enemy.getData('alive')||enemy.getData('mapId')!==projectile.getData('mapId'))return;
     const damage=projectile.getData('damage');
     const critical=projectile.getData('critical');
     projectile.destroy();
