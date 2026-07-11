@@ -1954,7 +1954,7 @@ class SkyberryHollow extends Phaser.Scene {
     const left=this.cursors.left.isDown, right=this.cursors.right.isDown;
     // Strong air steering preserves horizontal reach while the higher gravity
     // makes the vertical arc much faster and less floaty.
-    const moveSpeed=this.classProfile().moveSpeed*1.15*(body.velocity.y!==0?1.6:1);
+    const moveSpeed=this.classProfile().moveSpeed*1.25*(body.velocity.y!==0?1.6:1);
     const knockedBack=this.time.now<(this.player.getData('knockbackUntil')||0);
     if(!knockedBack){if(left){this.player.setVelocityX(-moveSpeed);this.player.setFlipX(true);this.player.setData('facing',-1);} else if(right){this.player.setVelocityX(moveSpeed);this.player.setFlipX(false);this.player.setData('facing',1);} else this.player.setVelocityX(0);}
     if(this.player.y>WORLD_H-18){this.respawnPlayer();return;}
