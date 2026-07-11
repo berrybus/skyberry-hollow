@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '140';
+const ASSET_VERSION = '141';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -490,6 +490,14 @@ class SkyberryHollow extends Phaser.Scene {
     this.createChests();
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,E,I,J,M,Q,S,V,SPACE');
+    this.mobileDirections={left:false,right:false};
+    this.mobileActions=new Set();
+    window.addEventListener('skyberry:mobilecontrol',event=>{
+      const {control,pressed}=event.detail||{};
+      this.audio.start();
+      if(control==='left'||control==='right'){this.mobileDirections[control]=Boolean(pressed);return;}
+      if(pressed)this.mobileActions.add(control);
+    });
     if(document.activeElement?.id==='hero-name')this.input.keyboard.enabled=false;
     window.addEventListener('skyberry:namefocus',event=>{
       if(!this.input?.keyboard)return;
@@ -1959,21 +1967,23 @@ class SkyberryHollow extends Phaser.Scene {
 
   update() {
     this.syncFixedUi();
-    if(this.chapterOnePanel)return;
-    if (Phaser.Input.Keyboard.JustDown(this.keys.I)) this.toggleInventory();
-    if (Phaser.Input.Keyboard.JustDown(this.keys.M)) this.toggleWorldMap();
-    if (Phaser.Input.Keyboard.JustDown(this.keys.J)) this.toggleQuestPanel();
+    if(this.chapterOnePanel){this.mobileActions?.clear();return;}
+    const takeMobile=control=>this.mobileActions?.delete(control)||false;
+    if (Phaser.Input.Keyboard.JustDown(this.keys.I)||takeMobile('inventory')) this.toggleInventory();
+    if (Phaser.Input.Keyboard.JustDown(this.keys.M)||takeMobile('map')) this.toggleWorldMap();
+    if (Phaser.Input.Keyboard.JustDown(this.keys.J)||takeMobile('quests')) this.toggleQuestPanel();
     if (Phaser.Input.Keyboard.JustDown(this.keys.V)){const muted=this.audio.activateOrToggle();if(this.audioHudText)this.audioHudText.setText(muted?'×':'♪');}
-    if(this.questPanelOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
-    if(this.worldMapOpen){this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
+    if(this.questPanelOpen){this.mobileActions.clear();this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
+    if(this.worldMapOpen){this.mobileActions.clear();this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     if (this.inventoryOpen) {
+      this.mobileActions.clear();
       this.syncEquipmentLayers();
       this.syncCarriedWeapon();
       return;
     }
-    if(this.mapTransitioning){this.player.setVelocity(0,0);this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
+    if(this.mapTransitioning){this.mobileActions.clear();this.player.setVelocity(0,0);this.syncEquipmentLayers();this.syncCarriedWeapon();return;}
     const body = this.player.body;
-    const left=this.cursors.left.isDown, right=this.cursors.right.isDown;
+    const left=this.cursors.left.isDown||this.mobileDirections.left, right=this.cursors.right.isDown||this.mobileDirections.right;
     // Strong air steering preserves horizontal reach while the higher gravity
     // makes the vertical arc much faster and less floaty.
     const moveSpeed=this.classProfile().moveSpeed*1.25*(body.velocity.y!==0?1.6:1);
@@ -1985,19 +1995,19 @@ class SkyberryHollow extends Phaser.Scene {
     // Remember ground contact briefly so jumping at a platform edge still feels responsive.
     if (body.onFloor() || body.blocked.down || body.touching.down) this.lastGrounded = this.time.now;
     // E talks to NPCs; Up is reserved for nearby travel gates.
-    const pressedJump = Phaser.Input.Keyboard.JustDown(this.keys.SPACE);
+    const pressedJump = Phaser.Input.Keyboard.JustDown(this.keys.SPACE)||takeMobile('jump');
     if (pressedJump && this.time.now - this.lastGrounded < 140) {
       this.audio.sfx('jump');
       this.player.setData('activeSlope',null);
       this.player.setVelocityY(JUMP_VELOCITY);
       this.lastGrounded = 0;
     }
-    if(Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+    if(Phaser.Input.Keyboard.JustDown(this.keys.E)||takeMobile('interact')) {
       if(!this.closeDialogue()){const chest=this.nearbyChest();if(chest)this.openChest(chest);else this.interactWithNpc();}
     }
-    if(Phaser.Input.Keyboard.JustDown(this.keys.Q))this.usePotion();
-    if(Phaser.Input.Keyboard.JustDown(this.keys.S))this.useAoeSkill();
-    if(Phaser.Input.Keyboard.JustDown(this.cursors.up))this.interactPortal();
+    if(Phaser.Input.Keyboard.JustDown(this.keys.Q)||takeMobile('potion'))this.usePotion();
+    if(Phaser.Input.Keyboard.JustDown(this.keys.S)||takeMobile('skill'))this.useAoeSkill();
+    if(Phaser.Input.Keyboard.JustDown(this.cursors.up)||takeMobile('portal'))this.interactPortal();
     if (this.player.getData('attacking')) {
       if (!this.player.getData('attackAirborne')) this.player.setVelocityX(0);
     } else if (body.velocity.y !== 0) {
@@ -2008,7 +2018,7 @@ class SkyberryHollow extends Phaser.Scene {
       if (left || right) this.bodyLayer.play('body-walk', true);
       else this.bodyLayer.play('body-idle', true);
     }
-    if(Phaser.Input.Keyboard.JustDown(this.keys.A)) this.meleeAttack();
+    if(Phaser.Input.Keyboard.JustDown(this.keys.A)||takeMobile('attack')) this.meleeAttack();
     this.syncEquipmentLayers();
     this.syncCarriedWeapon();
     const chest=this.nearbyChest(),npc=this.nearbyNpc(), portal=this.nearbyPortal();

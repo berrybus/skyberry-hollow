@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skyberry Hollow</title>
-    <link rel="stylesheet" href="./style.css?v=139" />
+    <link rel="stylesheet" href="./style.css?v=141" />
   </head>
   <body>
     <section id="welcome" class="welcome" aria-labelledby="welcome-title">
@@ -20,6 +20,25 @@
     </section>
     <main id="game-shell">
       <div id="game" aria-label="Playable Skyberry Hollow game"></div>
+      <section class="mobile-controls" aria-label="Touch controls">
+        <div class="touch-cluster touch-movement">
+          <button class="touch-button touch-portal" data-control="portal" aria-label="Enter portal">↑<small>PORTAL</small></button>
+          <button class="touch-button touch-left" data-control="left" aria-label="Move left">◀</button>
+          <button class="touch-button touch-right" data-control="right" aria-label="Move right">▶</button>
+        </div>
+        <div class="touch-cluster touch-actions">
+          <button class="touch-button touch-interact" data-control="interact" aria-label="Interact">E<small>TALK</small></button>
+          <button class="touch-button touch-skill" data-control="skill" aria-label="Use area skill">S<small>SKILL</small></button>
+          <button class="touch-button touch-attack" data-control="attack" aria-label="Attack">A<small>ATTACK</small></button>
+          <button class="touch-button touch-jump" data-control="jump" aria-label="Jump">↑<small>JUMP</small></button>
+          <button class="touch-button touch-potion" data-control="potion" aria-label="Use potion">✚<small>POTION</small></button>
+        </div>
+        <div class="touch-menus">
+          <button data-control="inventory">BAG</button>
+          <button data-control="quests">QUESTS</button>
+          <button data-control="map">MAP</button>
+        </div>
+      </section>
       <section class="instructions">
         <span><kbd>←</kbd><kbd>→</kbd> move</span>
         <span><kbd>↑</kbd> portal</span>
@@ -35,7 +54,7 @@
       </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-    <script src="./src/main.js?v=140"></script>
+    <script src="./src/main.js?v=141"></script>
     <script>
       const welcome=document.querySelector('#welcome'),nameInput=document.querySelector('#hero-name');
       nameInput.value=localStorage.getItem('skyberry_name')||'Lumi';
@@ -51,6 +70,12 @@
       };
       document.querySelector('#begin-adventure').addEventListener('click',beginAdventure);
       nameInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();beginAdventure();}});
+      document.querySelectorAll('[data-control]').forEach(button=>{
+        const send=pressed=>window.dispatchEvent(new CustomEvent('skyberry:mobilecontrol',{detail:{control:button.dataset.control,pressed}}));
+        button.addEventListener('pointerdown',event=>{event.preventDefault();button.setPointerCapture?.(event.pointerId);button.classList.add('pressed');send(true);});
+        ['pointerup','pointercancel','lostpointercapture'].forEach(type=>button.addEventListener(type,event=>{event.preventDefault();button.classList.remove('pressed');send(false);}));
+        button.addEventListener('contextmenu',event=>event.preventDefault());
+      });
       requestAnimationFrame(()=>{nameInput.focus();nameInput.select();});
     </script>
   </body>
