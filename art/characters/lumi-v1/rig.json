@@ -1,0 +1,584 @@
+{
+  "format": "skyberry.paperdoll/1",
+  "rig": {
+    "id": "lumi-standard",
+    "version": "2.2.0",
+    "animationSet": "explorer-v1",
+    "bodyType": "standard-youth",
+    "authoring": {
+      "canvasPolicy": "untrimmed-shared-coordinates",
+      "pixelGrid": 1,
+      "rootPolicy": "fixed-per-animation",
+      "note": "Layer PNGs are curated source art. The build pipeline only crops, validates, and packs them."
+    }
+  },
+  "slots": [
+    "body",
+    "hair_back",
+    "clothes_back",
+    "cape_back",
+    "weapon_back",
+    "hair_front",
+    "clothes_front",
+    "hat_back",
+    "hat_front",
+    "cape_front",
+    "weapon_front",
+    "effects"
+  ],
+  "drawOrder": {
+    "default": [
+      "cape_back",
+      "hair_back",
+      "body",
+      "clothes_back",
+      "weapon_back",
+      "hair_front",
+      "clothes_front",
+      "hat_back",
+      "hat_front",
+      "cape_front",
+      "weapon_front",
+      "effects"
+    ],
+    "attack": [
+      "cape_back",
+      "hair_back",
+      "body",
+      "clothes_back",
+      "weapon_back",
+      "hair_front",
+      "clothes_front",
+      "hat_back",
+      "hat_front",
+      "cape_front",
+      "weapon_front",
+      "effects"
+    ]
+  },
+  "animations": {
+    "idle": {
+      "source": "motion",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 2,
+      "canvas": [
+        96,
+        128
+      ],
+      "root": [
+        48,
+        64
+      ]
+    },
+    "walk": {
+      "source": "motion",
+      "frames": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "fps": 12,
+      "canvas": [
+        96,
+        128
+      ],
+      "root": [
+        48,
+        64
+      ]
+    },
+    "jump": {
+      "source": "air",
+      "frames": [
+        1
+      ],
+      "fps": 8,
+      "canvas": [
+        128,
+        128
+      ],
+      "root": [
+        64,
+        64
+      ]
+    },
+    "fall": {
+      "source": "air",
+      "frames": [
+        3
+      ],
+      "fps": 8,
+      "canvas": [
+        128,
+        128
+      ],
+      "root": [
+        64,
+        64
+      ]
+    },
+    "attack": {
+      "source": "attack",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 10,
+      "canvas": [
+        192,
+        128
+      ],
+      "root": [
+        96,
+        64
+      ]
+    },
+    "attack-wood": {
+      "source": "attack-wood",
+      "frames": [0,1,2,3],
+      "fps": 10,
+      "canvas": [192,128],
+      "root": [96,64]
+    }
+  },
+  "sockets": {
+    "hand": {
+      "idle": [
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -22,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -20,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -23,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -21,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        }
+      ],
+      "walk": [
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -22,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            7
+          ],
+          "rotation": -22,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            6,
+            5
+          ],
+          "rotation": -16,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            6,
+            4
+          ],
+          "rotation": -16,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            8,
+            7
+          ],
+          "rotation": -28,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            8,
+            8
+          ],
+          "rotation": -28,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            6
+          ],
+          "rotation": -22,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        },
+        {
+          "position": [
+            7,
+            5
+          ],
+          "rotation": -22,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        }
+      ],
+      "jump": [
+        {
+          "position": [
+            -12,
+            6
+          ],
+          "rotation": -52,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        }
+      ],
+      "fall": [
+        {
+          "position": [
+            -12,
+            6
+          ],
+          "rotation": -58,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.82
+          ]
+        }
+      ],
+      "attack": [
+        {
+          "position": [
+            13,
+            3
+          ],
+          "rotation": -72,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.72
+          ]
+        },
+        {
+          "position": [
+            17,
+            2
+          ],
+          "rotation": -35,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.72
+          ]
+        },
+        {
+          "position": [
+            23,
+            4
+          ],
+          "rotation": 18,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.72
+          ]
+        },
+        {
+          "position": [
+            18,
+            5
+          ],
+          "rotation": 48,
+          "scale": [
+            1,
+            1
+          ],
+          "pivot": [
+            0.5,
+            0.72
+          ]
+        }
+      ],
+      "attack-wood": [
+        {"position":[13,3],"rotation":-72,"scale":[1,1],"pivot":[0.5,0.72]},
+        {"position":[17,2],"rotation":-35,"scale":[1,1],"pivot":[0.5,0.72]},
+        {"position":[23,4],"rotation":18,"scale":[1,1],"pivot":[0.5,0.72]},
+        {"position":[18,5],"rotation":48,"scale":[1,1],"pivot":[0.5,0.72]}
+      ]
+    }
+  },
+  "items": {
+    "base_body": {
+      "version": "2.0.0",
+      "slot": "body",
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "layers": {
+        "body": {
+          "source": "layers/body/{source}.png"
+        }
+      },
+      "migration": {
+        "bundledHair": "short-brown",
+        "status": "high-fidelity-base-body-complete"
+      }
+    },
+    "short_brown_hair": {
+      "version": "1.0.0",
+      "slot": "hair",
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "layers": {},
+      "migration": {
+        "renderedBy": "base_body",
+        "status": "pending-artist-separation"
+      }
+    },
+    "beginner_tunic": {
+      "version": "1.0.0",
+      "slot": "clothes",
+      "classes": [
+        "beginner"
+      ],
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "layers": {
+        "clothes_front": {
+          "source": "layers/clothes-beginner/{source}.png"
+        }
+      },
+      "replaces": [
+        "body"
+      ],
+      "hides": [
+        "hair_back",
+        "hair_front"
+      ]
+    },
+    "beginner_cap": {
+      "version": "1.0.0",
+      "slot": "hat",
+      "classes": [
+        "beginner"
+      ],
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "layers": {
+        "hat_front": {
+          "source": "layers/hat-beginner/{source}.png"
+        }
+      },
+      "hides": [
+        "hair_front"
+      ]
+    },
+    "island_mantle": {
+      "version": "1.0.0",
+      "slot": "cape",
+      "classes": [
+        "beginner"
+      ],
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "layers": {
+        "cape_back": {
+          "source": "layers/cape-beginner/{source}.png"
+        }
+      }
+    },
+    "wooden_sword": {
+      "version": "1.0.0",
+      "slot": "weapon",
+      "classes": [
+        "beginner"
+      ],
+      "bodyTypes": [
+        "standard-youth"
+      ],
+      "rigs": [
+        "lumi-standard@1"
+      ],
+      "animationSet": "explorer-v1",
+      "rigidAttachment": {
+        "slot": "weapon_front",
+        "socket": "hand",
+        "texture": "carry-wood"
+      }
+    }
+  },
+  "representativeLoadouts": {
+    "empty": [
+      "base_body",
+      "short_brown_hair"
+    ],
+    "beginner": [
+      "base_body",
+      "short_brown_hair",
+      "beginner_tunic",
+      "beginner_cap",
+      "island_mantle",
+      "wooden_sword"
+    ]
+  }
+}

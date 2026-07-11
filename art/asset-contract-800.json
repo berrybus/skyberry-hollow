@@ -1,0 +1,19 @@
+{
+  "format": "skyberry.asset-contract/1",
+  "render": { "width": 800, "height": 600, "cameraZoom": 1, "sampling": "nearest", "sourcePixelsPerRenderPixel": 1 },
+  "world": { "height": 720, "tileGrid": 12 },
+  "actors": {
+    "player": { "motion": [96, 128], "air": [128, 128], "attack": [192, 128] },
+    "npc": { "frame": [96, 128], "frames": 4, "root": [48, 123] },
+    "enemy": { "frame": [96, 96], "frames": 6, "root": [48, 91] }
+  },
+  "terrain": { "platformCapWidth": 48, "slope": [96, 120], "groundHeight": 60 },
+  "rules": [
+    "No runtime image stretching",
+    "No per-frame scale normalization",
+    "All animation frames use an untrimmed shared canvas and fixed root",
+    "Backgrounds are exported at world dimensions and rendered at scale 1",
+    "Platforms use authored left, repeatable middle, and right tiles",
+    "Only nearest-neighbor integer re-export is allowed for legacy source grids"
+  ]
+}

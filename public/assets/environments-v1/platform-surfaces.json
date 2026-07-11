@@ -1,0 +1,86 @@
+{
+  "sprout-camp": {
+    "surfaceRatio": 0.18666666666666668,
+    "sourceWidth": 361,
+    "sourceHeight": 75,
+    "groundHeight": 60
+  },
+  "sunmeadow": {
+    "surfaceRatio": 0.3076923076923077,
+    "sourceWidth": 366,
+    "sourceHeight": 91,
+    "groundHeight": 60
+  },
+  "brambleway": {
+    "surfaceRatio": 0.22093023255813954,
+    "sourceWidth": 361,
+    "sourceHeight": 86,
+    "groundHeight": 60
+  },
+  "windroot": {
+    "surfaceRatio": 0.20987654320987653,
+    "sourceWidth": 364,
+    "sourceHeight": 81,
+    "groundHeight": 60
+  },
+  "tidehollow": {
+    "surfaceRatio": 0.1927710843373494,
+    "sourceWidth": 361,
+    "sourceHeight": 83,
+    "groundHeight": 60
+  },
+  "gullhaven": {
+    "surfaceRatio": 0.1282051282051282,
+    "sourceWidth": 361,
+    "sourceHeight": 78,
+    "groundHeight": 60
+  },
+  "stonewatch": {
+    "surfaceRatio": 0.0273972602739726,
+    "sourceWidth": 361,
+    "sourceHeight": 73,
+    "groundHeight": 60
+  },
+  "greenbloom": {
+    "surfaceRatio": 0.07142857142857142,
+    "sourceWidth": 363,
+    "sourceHeight": 70,
+    "groundHeight": 60
+  },
+  "starwillow": {
+    "surfaceRatio": 0.1875,
+    "sourceWidth": 361,
+    "sourceHeight": 80,
+    "groundHeight": 60
+  },
+  "saltwind": {
+    "surfaceRatio": 0.2465753424657534,
+    "sourceWidth": 359,
+    "sourceHeight": 73,
+    "groundHeight": 60
+  },
+  "rubblepass": {
+    "surfaceRatio": 0.13333333333333333,
+    "sourceWidth": 361,
+    "sourceHeight": 75,
+    "groundHeight": 60
+  },
+  "whispering-range": {
+    "surfaceRatio": 0.26136363636363635,
+    "sourceWidth": 361,
+    "sourceHeight": 88,
+    "groundHeight": 60
+  },
+  "moonlit-boughs": {
+    "surfaceRatio": 0.2222222222222222,
+    "sourceWidth": 363,
+    "sourceHeight": 72,
+    "groundHeight": 60
+  },
+  "crystal-hollow": {
+    "surfaceRatio": 0.16,
+    "sourceWidth": 361,
+    "sourceHeight": 75,
+    "groundHeight": 60
+  }
+}

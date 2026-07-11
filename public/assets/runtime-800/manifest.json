@@ -1,0 +1,176 @@
+{
+  "format": "skyberry.runtime-assets/800x600-v1",
+  "render": [
+    800,
+    600
+  ],
+  "sampling": "nearest-1:1",
+  "maps": {
+    "sprout-camp": {
+      "width": 1152,
+      "height": 720,
+      "platformHeight": 75,
+      "surfaceY": 14,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "brambleway": {
+      "width": 1440,
+      "height": 720,
+      "platformHeight": 86,
+      "surfaceY": 19,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "tidehollow": {
+      "width": 1152,
+      "height": 720,
+      "platformHeight": 83,
+      "surfaceY": 16,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "gullhaven": {
+      "width": 1440,
+      "height": 720,
+      "platformHeight": 78,
+      "surfaceY": 10,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "stonewatch": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 73,
+      "surfaceY": 2,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "greenbloom": {
+      "width": 1440,
+      "height": 720,
+      "platformHeight": 70,
+      "surfaceY": 5,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "starwillow": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 80,
+      "surfaceY": 15,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "sunmeadow": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 91,
+      "surfaceY": 28,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "windroot": {
+      "width": 1440,
+      "height": 720,
+      "platformHeight": 81,
+      "surfaceY": 17,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "saltwind": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 73,
+      "surfaceY": 18,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "rubblepass": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 75,
+      "surfaceY": 10,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "whispering-range": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 88,
+      "surfaceY": 23,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "moonlit-boughs": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 72,
+      "surfaceY": 16,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    },
+    "crystal-hollow": {
+      "width": 1344,
+      "height": 720,
+      "platformHeight": 75,
+      "surfaceY": 12,
+      "capWidth": 48,
+      "middleWidth": 64,
+      "groundHeight": 60
+    }
+  },
+  "npcs": [
+    "ada",
+    "anvil",
+    "bix",
+    "brann",
+    "captain-sol",
+    "coral",
+    "dockmaster-ori",
+    "elio",
+    "ember",
+    "fern",
+    "finn",
+    "holt",
+    "ione",
+    "june",
+    "lyra",
+    "marlo",
+    "mira",
+    "mote",
+    "nell",
+    "orin",
+    "perrin",
+    "pip",
+    "rook",
+    "sage",
+    "suri",
+    "tessa",
+    "tobi",
+    "vela",
+    "vena",
+    "wren"
+  ],
+  "enemies": [
+    "bloomcap",
+    "bramblehog",
+    "spriglet",
+    "starcrawler",
+    "stonepup",
+    "tidecrab"
+  ]
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyberry Hollow</title>
+    <link rel="stylesheet" href="./style.css?v=133" />
+  </head>
+  <body>
+    <section id="welcome" class="welcome" aria-labelledby="welcome-title">
+      <div class="welcome-card">
+        <p class="eyebrow">A NEW STORY BEGINS</p>
+        <h1 id="welcome-title">Skyberry Hollow</h1>
+        <p>The sky-islands are forgetting their names. Begin in Sprout Camp and follow the bell-song beneath the roots.</p>
+        <label for="hero-name">Adventurer name</label>
+        <input id="hero-name" maxlength="14" autocomplete="off" value="Lumi" />
+        <button id="begin-adventure" type="button">Begin Adventure</button>
+      </div>
+    </section>
+    <main id="game-shell">
+      <div id="game" aria-label="Playable Skyberry Hollow game"></div>
+      <section class="instructions">
+        <span><kbd>←</kbd><kbd>→</kbd> move</span>
+        <span><kbd>↑</kbd> portal</span>
+        <span><kbd>E</kbd> talk / close dialog</span>
+        <span><kbd>Space</kbd> jump</span>
+        <span><kbd>A</kbd> class attack</span>
+        <span><kbd>Q</kbd> potion</span>
+        <span><kbd>S</kbd> AOE skill</span>
+        <span><kbd>I</kbd> inventory</span>
+        <span><kbd>J</kbd> quests</span>
+        <span><kbd>M</kbd> world map</span>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+    <script src="./src/main.js?v=133"></script>
+    <script>
+      const welcome=document.querySelector('#welcome'),nameInput=document.querySelector('#hero-name');
+      nameInput.value=localStorage.getItem('skyberry_name')||'Lumi';
+      const setNameFocus=focused=>window.dispatchEvent(new CustomEvent('skyberry:namefocus',{detail:{focused}}));
+      nameInput.addEventListener('focus',()=>setNameFocus(true));
+      nameInput.addEventListener('blur',()=>setNameFocus(false));
+      nameInput.addEventListener('keydown',event=>event.stopPropagation());
+      const beginAdventure=()=>{
+        const name=(nameInput.value.trim()||'Lumi').slice(0,14);
+        nameInput.value=name;localStorage.setItem('skyberry_name',name);setNameFocus(false);welcome.hidden=true;
+        window.__skyberryStartRequest={name};
+        window.dispatchEvent(new CustomEvent('skyberry:start',{detail:{name}}));
+      };
+      document.querySelector('#begin-adventure').addEventListener('click',beginAdventure);
+      nameInput.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();beginAdventure();}});
+      requestAnimationFrame(()=>{nameInput.focus();nameInput.select();});
+    </script>
+  </body>
+</html>
