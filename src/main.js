@@ -5,7 +5,7 @@ const TILE = 12;
 const WORLD_W = 27600;
 const WORLD_GRAVITY = 1300;
 const WORLD_H = 720;
-const ASSET_VERSION = '136';
+const ASSET_VERSION = '138';
 const JUMP_VELOCITY = -570;
 const UI_FONT = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MAP_DEFINITIONS = {
@@ -113,7 +113,7 @@ const MAP_DEFINITIONS = {
     exits:[{x:60,to:'moonlit_boughs',spawn:'right',label:'MOONLIT BOUGHS'},{x:420,to:'stonewatch',spawn:'right',label:'WATCH MINE BRANCH'},{x:900,to:'whispering_range',spawn:'right',label:'HOLLOW TREE DESCENT',secret:true}],
     npcs:[],enemies:[[550,634,400,760,'starcrawler'],[1060,634,900,1210,'stonepup']],berries:[[330,544],[570,484],[792,424],[1026,364]],chests:[[1220,372]],
   },
-  sprout_market:{id:'sprout_market',kind:'interior',showOnWorldMap:false,art:'sprout-camp',x:22200,width:800,region:'dawnleaf',terrainTint:0xb77a4c,label:'SPROUT CAMP • CAMP MARKET',spawn:{door:[400,594]},platforms:[[108,564,180],[512,564,180]],exits:[{x:400,to:'sprout_camp',spawn:'camp',label:'BACK TO SPROUT CAMP'}],npcs:[{x:198,frame:1,name:'PERRIN',role:'POTION SELLER',type:'shop_potion'},{x:602,frame:2,name:'TESSA',role:'ARMOR SELLER',type:'shop_armor'}],enemies:[],berries:[],chests:[]},
+  sprout_market:{id:'sprout_market',kind:'interior',showOnWorldMap:false,art:'sprout-camp',x:22200,width:800,region:'dawnleaf',terrainTint:0xb77a4c,label:'SPROUT CAMP • CAMP MARKET',spawn:{door:[400,594]},platforms:[],exits:[{x:400,to:'sprout_camp',spawn:'camp',label:'BACK TO SPROUT CAMP'}],npcs:[{x:198,frame:1,name:'PERRIN',role:'POTION SELLER',type:'shop_potion'},{x:602,frame:2,name:'TESSA',role:'ARMOR SELLER',type:'shop_armor'}],enemies:[],berries:[],chests:[]},
   tide_market:{id:'tide_market',kind:'interior',showOnWorldMap:false,art:'tidehollow',x:23100,width:800,region:'dawnleaf',terrainTint:0x9c6948,label:'TIDEHOLLOW • HARBOR SHOPS',spawn:{door:[400,594]},platforms:[[108,564,180],[512,564,180]],exits:[{x:400,to:'tidehollow',spawn:'left',label:'BACK TO TIDEHOLLOW'}],npcs:[{x:198,frame:1,name:'MARLO',role:'POTION SELLER',type:'shop_potion'},{x:602,frame:2,name:'VENA',role:'ARMOR SELLER',type:'shop_armor'}],enemies:[],berries:[],chests:[]},
   gull_market:{id:'gull_market',kind:'interior',showOnWorldMap:false,art:'gullhaven',x:24000,width:800,region:'crownwind',terrainTint:0x765a49,label:'GULLHAVEN • DOCK MARKET',spawn:{door:[400,594]},platforms:[[108,564,180],[512,564,180]],exits:[{x:400,to:'gullhaven',spawn:'dock',label:'BACK TO GULLHAVEN'}],npcs:[{x:198,frame:1,name:'CORAL',role:'POTION SELLER',type:'shop_potion'},{x:602,frame:2,name:'HOLT',role:'ARMOR SELLER',type:'shop_armor'}],enemies:[],berries:[],chests:[]},
   stone_market:{id:'stone_market',kind:'interior',showOnWorldMap:false,art:'stonewatch',x:24900,width:800,region:'crownwind',terrainTint:0x665c59,label:'STONEWATCH • FORGE ROW',spawn:{door:[400,594]},platforms:[[108,564,180],[512,564,180]],exits:[{x:400,to:'stonewatch',spawn:'mentor',label:'BACK TO STONEWATCH'}],npcs:[{x:198,frame:1,name:'EMBER',role:'POTION SELLER',type:'shop_potion'},{x:602,frame:2,name:'ANVIL',role:'ARMOR SELLER',type:'shop_armor'}],enemies:[],berries:[],chests:[]},
@@ -195,7 +195,7 @@ const NPC_LAYOUTS={
   stonewatch:{BRANN:[240,660],EMBER:[600,612],ANVIL:[760,564],ROOK:[900,516],IONE:[1150,420]},
   greenbloom:{LYRA:[260,660],SAGE:[600,612],FERN:[740,564],WREN:[900,516],TOBI:[1090,468]},
   starwillow:{ORIN:[250,660],MOTE:[540,612],VELA:[660,564],ELIO:[900,468],SURI:[1120,564]},
-  sprout_market:{PERRIN:[198,564],TESSA:[602,564]}, tide_market:{MARLO:[198,564],VENA:[602,564]},
+  sprout_market:{PERRIN:[238,660],TESSA:[562,660]}, tide_market:{MARLO:[198,564],VENA:[602,564]},
   gull_market:{CORAL:[198,564],HOLT:[602,564]}, stone_market:{EMBER:[198,564],ANVIL:[602,564]},
   green_market:{SAGE:[198,564],FERN:[602,564]}, star_market:{MOTE:[198,564],VELA:[602,564]},
 };
@@ -427,6 +427,7 @@ class SkyberryHollow extends Phaser.Scene {
     const startAdventure=event=>{
       this.audio.start();
       this.playerName=(event.detail?.name||'Lumi').slice(0,14);
+      if(this.playerNameTag)this.playerNameTag.setText(this.playerName.toUpperCase());
       this.chapterStartedAt=this.time.now;
       if(!new URLSearchParams(window.location.search).has('map'))this.enterMap('sprout_camp','camp',true);
       this.refreshHud();this.requestInventoryRefresh();
@@ -445,6 +446,7 @@ class SkyberryHollow extends Phaser.Scene {
     this.paperdollAnchors = this.cache.json.get('paperdoll-anchors');
     this.capeLayer = this.add.sprite(108, 594, 'cape-indigo-motion', 0).setDepth(3.3);
     this.player = this.physics.add.sprite(108, 594, 'body-motion', 0).setVisible(false).setCollideWorldBounds(true).setSize(44, 84).setOffset(26, 42);
+    this.playerNameTag=crispText(this.add.text(108,642,this.playerName.toUpperCase(),{fontFamily:UI_FONT,fontSize:'11px',fontStyle:'bold',color:'#fff6d5',backgroundColor:'rgba(27,43,69,.9)',padding:{x:5,y:2},stroke:'#273753',strokeThickness:1}).setOrigin(.5).setDepth(7));
     this.bodyLayer = this.add.sprite(108, 594, 'body-motion', 0).setDepth(4);
     this.clothesLayer = this.add.sprite(108, 594, 'clothes-traveler-motion', 0).setDepth(4.4);
     this.hatLayer = this.add.sprite(108, 594, 'hat-traveler-motion', 0).setDepth(5);
@@ -793,6 +795,7 @@ class SkyberryHollow extends Phaser.Scene {
     this.bodyLayer.setPosition(Math.round(this.player.x), Math.round(this.player.y))
       .setOrigin(originRoot / anchor.width, anchor.originY)
       .setFlipX(this.player.flipX);
+    if(this.playerNameTag)this.playerNameTag.setPosition(Math.round(this.player.x),Math.round(this.player.y+49));
   }
 
   syncEquipmentLayers() {
@@ -1087,14 +1090,7 @@ class SkyberryHollow extends Phaser.Scene {
       const platformMeta=this.platformSurfaces[map.art];
       const groundHeight=platformMeta.groundHeight;
       if(map.kind==='interior'){
-        this.add.image(map.x+map.width/2,360,`shop-interior-${map.id}`).setDisplaySize(map.width,600).setDepth(-7);
-        this.add.rectangle(map.x+map.width/2,360,map.width,600,Phaser.Display.Color.ValueToColor(map.terrainTint).darken(34).color,.98).setDepth(-6);
-        this.add.rectangle(map.x+map.width/2,168,map.width-72,18,0xead49a,.9).setDepth(-5);
-        [72,304,496,728].forEach(localX=>this.add.rectangle(map.x+localX,360,16,384,0x513b38,.9).setDepth(-5));
-        [198,602].forEach(localX=>{
-          this.add.rectangle(map.x+localX,410,210,150,0x332b38,.78).setStrokeStyle(4,0xe5c67e).setDepth(-4);
-          this.add.rectangle(map.x+localX,478,170,14,0xd1a45e,1).setDepth(-3);
-        });
+        this.add.image(map.x+map.width/2,360,`shop-interior-${map.id}`).setDisplaySize(map.width,600).setDepth(1.5);
       }
       this.add.tileSprite(map.x+map.width/2,660,map.width,groundHeight,`ground-${map.id}`)
         .setOrigin(.5,0).setDepth(2);
